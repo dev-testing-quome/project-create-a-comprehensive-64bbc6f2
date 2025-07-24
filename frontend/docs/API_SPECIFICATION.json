@@ -4,7 +4,7 @@
   "info": {
     "title": "Project Create a Comprehensive Healthcare Patient Portal API",
     "version": "v1",
-    "description": "A comprehensive healthcare patient portal API with HIPAA-compliant security."
+    "description": "A comprehensive HIPAA-compliant healthcare patient portal API."
   },
   "servers": [
     {
@@ -24,82 +24,18 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "healthy"
-                    }
+                    "status": { "type": "string", "example": "healthy" }
                   }
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "summary": "Login endpoint",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Login successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
           }
         }
       }
     },
     "/patients": {
-      "get": {
-        "summary": "Get all patients (admin only)",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of patients",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Patient"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      },
       "post": {
-        "summary": "Create a new patient",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "summary": "Register a new patient",
         "requestBody": {
           "required": true,
           "content": {
@@ -121,28 +57,41 @@
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        },
+        "security": [{"JWT": []}]
+      },
+      "get": {
+        "summary": "Get all patients (admin only)",
+        "responses": {
+          "200": {
+            "description": "List of patients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Patient"
+                  }
+                }
+              }
+            }
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        },
+        "security": [{"JWT": []}]
       }
     },
-    "/patients/{patientId}": {
+    "/patients/{id}": {
       "get": {
-        "summary": "Get a patient by ID",
+        "summary": "Get patient by ID",
         "parameters": [
           {
-            "name": "patientId",
+            "name": "id",
             "in": "path",
             "description": "Patient ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
@@ -156,23 +105,19 @@
               }
             }
           },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [{"JWT": []}]
       },
       "put": {
-        "summary": "Update a patient",
+        "summary": "Update patient information",
         "parameters": [
           {
-            "name": "patientId",
+            "name": "id",
             "in": "path",
             "description": "Patient ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "requestBody": {
@@ -196,106 +141,103 @@
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [{"JWT": []}]
       },
       "delete": {
-        "summary": "Delete a patient",
+        "summary": "Delete patient (admin only)",
         "parameters": [
           {
-            "name": "patientId",
+            "name": "id",
             "in": "path",
             "description": "Patient ID",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            "schema": { "type": "integer", "format": "int64" }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Patient deleted"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
+          "204": { "description": "Patient deleted" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        },
+        "security": [{"JWT": []}]
+      }
+    },
+    // ... (other endpoints for appointments, messages, medical records, etc.)
+    "/auth/login": {
+      "post": {
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
           }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
         }
       }
     }
   },
   "components": {
     "schemas": {
-      "LoginRequest": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "username",
-          "password"
-        ]
-      },
-      "LoginResponse": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          }
-        }
-      },
       "Patient": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "dob": {
-            "type": "string",
-            "format": "date"
-          }
-        },
-        "required": [
-          "firstName",
-          "lastName",
-          "dob"
-        ]
+          "id": { "type": "integer", "format": "int64" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "dob": { "type": "string", "format": "date" },
+          // ... other patient properties
+        }
       }
     },
     "responses": {
-      "Unauthorized": {
-        "description": "Unauthorized",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
-            }
-          }
-        }
-      },
       "BadRequest": {
         "description": "Bad Request",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+              "type": "object",
+              "properties": {
+                "error": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": { "type": "string" }
+              }
             }
           }
         }
@@ -305,14 +247,17 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/ErrorResponse"
+              "type": "object",
+              "properties": {
+                "error": { "type": "string" }
+              }
             }
           }
         }
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "JWT": {
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
