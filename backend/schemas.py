@@ -1,109 +1,91 @@
-from typing import Optional
 from pydantic import BaseModel, Field
+from typing import Optional
 from datetime import datetime
 
-class HTTPError(BaseModel):
-    detail: str
-
-class UserBase(BaseModel):
+class UserCreate(BaseModel):
     username: str
     password: str
+    email: str
     first_name: str
     last_name: str
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
     email: str
-    is_doctor: Optional[bool] = False
-
-class UserCreate(UserBase):
-    pass
-
-class UserUpdate(UserBase):
-    pass
-
-class User(UserBase):
-    id: int
+    first_name: str
+    last_name: str
     created_at: datetime
     updated_at: datetime
-    appointments: list['Appointment'] = []
-    messages: list['Message'] = []
-    messages_received: list['Message'] = []
-    medical_records: list['MedicalRecord'] = []
-    prescriptions: list['Prescription'] = []
 
-class AppointmentBase(BaseModel):
+class AppointmentCreate(BaseModel):
     patient_id: int
-    doctor_id: int
+    provider_id: int
     date_time: datetime
-    reason: str
-    status: str = 'pending'
+    description: str
 
-class AppointmentCreate(AppointmentBase):
-    pass
-
-class AppointmentUpdate(AppointmentBase):
-    pass
-
-class Appointment(AppointmentBase):
+class AppointmentResponse(BaseModel):
     id: int
+    patient_id: int
+    provider_id: int
+    date_time: datetime
+    description: str
     created_at: datetime
     updated_at: datetime
 
-class MessageBase(BaseModel):
+class MessageCreate(BaseModel):
     sender_id: int
     recipient_id: int
     content: str
 
-class MessageCreate(MessageBase):
-    pass
-
-class Message(MessageBase):
+class MessageResponse(BaseModel):
     id: int
+    sender_id: int
+    recipient_id: int
+    content: str
     timestamp: datetime
 
-class MedicalRecordBase(BaseModel):
+class MedicalRecordCreate(BaseModel):
     patient_id: int
     document: str
+    description: str
 
-class MedicalRecordCreate(MedicalRecordBase):
-    pass
-
-class MedicalRecord(MedicalRecordBase):
+class MedicalRecordResponse(BaseModel):
     id: int
-    timestamp: datetime
+    patient_id: int
+    document: str
+    description: str
+    created_at: datetime
+    updated_at: datetime
 
-class PrescriptionBase(BaseModel):
+class PrescriptionCreate(BaseModel):
     patient_id: int
     medication: str
     dosage: str
     instructions: str
 
-class PrescriptionCreate(PrescriptionBase):
-    pass
-
-class Prescription(PrescriptionBase):
+class PrescriptionResponse(BaseModel):
     id: int
-    timestamp: datetime
-
-class BillingBase(BaseModel):
     patient_id: int
+    medication: str
+    dosage: str
+    instructions: str
+    date_prescribed: datetime
+    created_at: datetime
+    updated_at: datetime
+
+class BillingCreate(BaseModel):
+    patient_id: int
+    service: str
     amount: int
-    status: str
-    insurance_claim_id: Optional[int] = None
+    insurance_claim_status: Optional[str] = None
 
-class BillingCreate(BillingBase):
-    pass
-
-class Billing(BillingBase):
+class BillingResponse(BaseModel):
     id: int
-    date: datetime
-
-class InsuranceClaimBase(BaseModel):
     patient_id: int
-    claim_number: str
-    status: str
-
-class InsuranceClaimCreate(InsuranceClaimBase):
-    pass
-
-class InsuranceClaim(InsuranceClaimBase):
-    id: int
-    date_submitted: datetime
+    service: str
+    amount: int
+    date: datetime
+    insurance_claim_status: Optional[str]
+    created_at: datetime
+    updated_at: datetime

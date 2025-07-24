@@ -1,18 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from ..database import get_db
+from ..schemas import MessageCreate, MessageResponse
 from ..models import Message
-from ..schemas import Message, MessageCreate
 
-router = APIRouter(prefix="/api/messages", tags=["Messages"])
+router = APIRouter(prefix='/api/messages', tags=['Messages'])
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=Message)
+@router.post('/', response_model=MessageResponse)
 def create_message(message: MessageCreate, db: Session = Depends(get_db)):
-    # Add message creation logic here
-    pass
-
-@router.get("/{message_id}", response_model=Message)
-def get_message(message_id: int, db: Session = Depends(get_db)):
-    # Add message retrieval logic here
-    pass
+    new_message = Message(**message.dict())
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+    return new_message
